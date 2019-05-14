@@ -12,13 +12,12 @@ from datetime import datetime
 
 TODAY = datetime.today()
 
-BOT_NAME = 'ldn-ont-weather-data-crawler'
+BOT_NAME = 'climate-canada-historical-data-crawler'
 
 SPIDER_MODULES = ['webcrawler.spiders']
 NEWSPIDER_MODULE = 'webcrawler.spiders'
 
 # Output configuration
-FEED_URI = '../data/../data/scrapy_{}.csv'.format(str(TODAY.date()))
 FEED_FORMAT = 'csv'
 FEED_STORAGES = {'file': 'scrapy.extensions.feedexport.FileFeedStorage'}
 # FEED_EXPORTERS
