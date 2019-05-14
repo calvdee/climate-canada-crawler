@@ -1,7 +1,7 @@
 import scrapy
-import pandas as pd 
 import calendar
 import itertools
+import pandas as pd
 from datetime import datetime
 from webcrawler.items import HourlyWeatherDataItem, DailyWeatherDataItem
 
@@ -18,9 +18,6 @@ URL_PARAMS = """
 &Month={:02}
 &Year={}""".replace("\n", "")
 
-RUN_FROM = '2010-01-01'
-RUN_TO = ''
-
 class MonthlyWeatherSpider(scrapy.Spider):
     name = "monthly_weather_spider"
     allowed_domains = ["climate.weather.gc.ca"]
@@ -28,11 +25,19 @@ class MonthlyWeatherSpider(scrapy.Spider):
     def start_requests(self):
         self.logger.info("Generating requests")
         today = pd.datetime(datetime.today().year,  datetime.today().month,  datetime.today().day)
+
+        # Generate a series of dates from `run_from` to `run_to`
+        # These parameters are provided by the scrapy engine
         dates = pd.Series(
-            pd.date_range(RUN_FROM, 
-            RUN_TO if RUN_TO != '' else today + pd.offsets.MonthEnd(), 
+            pd.date_range(self.run_from, 
+            self.run_to if self.run_to != '' else today + pd.offsets.MonthEnd(), 
             freq='M'))
+    
+        # Break dates into (year,month) tuples to use as parameters to
+        # the Climate Canada web app
         date_tups = dates.apply(lambda x: (x.year, x.month)).values
+
+        # Create (station,(year,month)) tuples
         station_tups = list(itertools.product(list(STATIONS.keys()), date_tups))
         self.logger.info(station_tups)
         # station_tups = [('4789', (2012, 1))] # DEBUG
