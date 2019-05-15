@@ -23,7 +23,13 @@ class MonthlyWeatherSpider(scrapy.Spider):
     allowed_domains = ["climate.weather.gc.ca"]
 
     def start_requests(self):
-        self.logger.info("Generating requests")
+        if not hasattr(self, 'run_from'):
+            raise Exception('Missing required parameter `run_from`')
+        
+        if not hasattr(self, 'run_to'):
+            self.run_to = ''
+
+        self.logger.info("Generating requests for parameters RUN FROM={}, RUN TO={}".format(self.run_from, self.run_to))
         today = pd.datetime(datetime.today().year,  datetime.today().month,  datetime.today().day)
 
         # Generate a series of dates from `run_from` to `run_to`
@@ -32,7 +38,7 @@ class MonthlyWeatherSpider(scrapy.Spider):
             pd.date_range(self.run_from, 
             self.run_to if self.run_to != '' else today + pd.offsets.MonthEnd(), 
             freq='M'))
-    
+
         # Break dates into (year,month) tuples to use as parameters to
         # the Climate Canada web app
         date_tups = dates.apply(lambda x: (x.year, x.month)).values
